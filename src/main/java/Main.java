@@ -1,7 +1,7 @@
 public class Main {
     public static void main(String[] args) {
         System.out.println("Hello REC!");
-        FRead r = new FRead();
+        DocReader r = new DocReader();
         System.out.println(r.jsonReader().get("WEB_ROOT"));
         System.out.println(r.jsonReader().get("DEFAULT_FILE"));
         System.out.println(r.jsonReader().get("FILE_NOT_FOUND"));

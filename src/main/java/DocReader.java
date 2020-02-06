@@ -5,8 +5,8 @@ import java.io.FileReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class FRead {
-    FRead() {
+public class DocReader {
+    DocReader() {
         jsonReader();
     }
 
@@ -23,7 +23,7 @@ public class FRead {
         JsonObject jso = (JsonObject) jsonStruct;
         Map<String, Object> map = new LinkedHashMap<>();
         for (Map.Entry<String, JsonValue> e : jso.entrySet()) {
-            map.put(e.getKey(),(e.getValue()));
+            map.put(e.getKey(),(e.getValue().toString().replace("\"", "")));
         }
         return map;
     }

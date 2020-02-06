@@ -1,3 +1,5 @@
+import jdk.swing.interop.SwingInterOpUtils;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,19 +13,21 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 // The tutorial can be found just here on the SSaurel's Blog :
 // https://www.ssaurel.com/blog/create-a-simple-http-web-server-in-java
 // Each Client Connection will be managed in a dedicated Thread
-public class JavaHTTPServer implements Runnable{
+public class JavaHTTPServer implements Runnable {
 
-    static FRead config = new FRead();
+    static DocReader config = new DocReader();
     // config file
 //    static Object o = config.jsonReader().get("WEB_ROOT");
 //    static final File WEB_ROOT = new File(config.jsonReader().get("WEB_ROOT").toString()); //doesnt work!!
 //    static String webRoot = config.jsonReader().get("WEB_ROOT").toString().replace("\"", ""); //unnecessary
-    static final File WEB_ROOT = new File(config.jsonReader().get("WEB_ROOT").toString().replace("\"", ""));
+    static final File WEB_ROOT = new File(config.jsonReader().get("WEB_ROOT").toString());
     static final String DEFAULT_FILE = (String) config.jsonReader().get("DEFAULT_FILE").toString();
     static final String FILE_NOT_FOUND = (String) config.jsonReader().get("FILE_NOT_FOUND").toString();
     static final String METHOD_NOT_SUPPORTED = (String) config.jsonReader().get("METHOD_NOT_SUPPORTED").toString();
@@ -48,16 +52,23 @@ public class JavaHTTPServer implements Runnable{
             // we listen until user halts server execution
             while (true) {
                 JavaHTTPServer myServer = new JavaHTTPServer(serverConnect.accept());
-                FRead r = new FRead();
 
                 if (verbose) {
                     System.out.println("Connection opened. (" + new Date() + ")");
                 }
 
                 // create dedicated thread to manage the client connection
-            // Executors.newCachedThreadPool();
+                // problem for later
+                ExecutorService service = Executors.newCachedThreadPool();
+                ThreadPoolExecutor threadPool = (ThreadPoolExecutor) service;
+//                threadPool.submit();
+                service.execute(
+                        () -> {
+                            //GET, HEAD, PUT
+                            System.out.println("Do something");
+                        });
+                service.shutdown();
 
-            // service.submit
 
                 Thread thread = new Thread(myServer);
                 thread.start();
@@ -71,7 +82,9 @@ public class JavaHTTPServer implements Runnable{
     @Override
     public void run() {
         // we manage our particular client connection
-        BufferedReader in = null; PrintWriter out = null; BufferedOutputStream dataOut = null;
+        BufferedReader in = null;
+        PrintWriter out = null;
+        BufferedOutputStream dataOut = null;
         String fileRequested = null;
 
         try { //try (Socket socket = socket) {
@@ -82,8 +95,9 @@ public class JavaHTTPServer implements Runnable{
             // get binary output stream to client (for requested data)
             dataOut = new BufferedOutputStream(connect.getOutputStream());
 
-        // timeout
-        // loop
+            connect.setSoTimeout(10000); //
+            // timeout
+            // loop
 
             // get first line of the request from the client
             String input = in.readLine();
@@ -93,9 +107,9 @@ public class JavaHTTPServer implements Runnable{
             // we get file requested
             fileRequested = parse.nextToken().toLowerCase();
 
-        // object oriented solution
+            // object oriented solution
             // we support only GET and HEAD methods, we check
-            if (!method.equals("GET")  &&  !method.equals("HEAD")) {
+            if (!method.equals("GET") && !method.equals("HEAD")) {
                 if (verbose) {
                     System.out.println("501 Not Implemented : " + method + " method.");
                 }
@@ -108,13 +122,7 @@ public class JavaHTTPServer implements Runnable{
                 byte[] fileData = readFileData(file, fileLength);
 
                 // we send HTTP Headers with data to client
-                out.println("HTTP/1.1 501 Not Implemented");
-                out.println("Server: Java HTTP Server from SSaurel : 1.0");
-                out.println("Date: " + new Date());
-                out.println("Content-type: " + contentMimeType);
-                out.println("Content-length: " + fileLength);
-                out.println(); // blank line between headers and content, very important !
-                out.flush(); // flush character output stream buffer
+                Header fiveOhOne = new Header(out, "501 Not implemented", contentMimeType, fileLength);
                 // file
                 dataOut.write(fileData, 0, fileLength);
                 dataOut.flush();
@@ -133,18 +141,11 @@ public class JavaHTTPServer implements Runnable{
                 if (method.equals("GET")) { // GET method so we return content
                     byte[] fileData = readFileData(file, fileLength);
 
-                // print header method or request object
-                // response object
+                    // print header method or request object
+                    // response object
 
                     // send HTTP Headers
-                    out.print("HTTP/1.1 200 OK\r\n");
-                    out.println("Server: Java HTTP Server from SSaurel : 1.0");
-                    out.println("Date: " + new Date());
-                    out.println("Content-type: " + content);
-                    out.println("Content-length: " + fileLength);
-                    out.println(); // blank line between headers and content, very important !
-                    out.flush(); // flush character output stream buffer
-
+                    Header twoOhOh = new Header(out, "200 OK", content, fileLength);
                     dataOut.write(fileData, 0, fileLength);
                     dataOut.flush();
                 }
@@ -197,26 +198,20 @@ public class JavaHTTPServer implements Runnable{
 
     // return supported MIME Types
     private String getContentType(String fileRequested) {
-        if (fileRequested.endsWith(".htm")  ||  fileRequested.endsWith(".html"))
+        if (fileRequested.endsWith(".htm") || fileRequested.endsWith(".html"))
             return "text/html";
         else
             return "text/plain";
     }
 
     private void fileNotFound(PrintWriter out, OutputStream dataOut, String fileRequested) throws IOException {
-        File file = new File(WEB_ROOT.toString(), FILE_NOT_FOUND.replace("\"",""));
+        File file = new File(WEB_ROOT.toString(), FILE_NOT_FOUND.replace("\"", ""));
 
         int fileLength = (int) file.length(); //long
         String content = "text/html";
         byte[] fileData = readFileData(file, fileLength); //only works with int
 
-        out.println("HTTP/1.1 404 File Not Found");
-        out.println("Server: Java HTTP Server from SSaurel : 1.0");
-        out.println("Date: " + new Date());
-        out.println("Content-type: " + content);
-        out.println("Content-length: " + fileLength);
-        out.println(); // blank line between headers and content, very important !
-        out.flush(); // flush character output stream buffer
+        Header fourOhFour = new Header(out, "404 File Not Found", content,fileLength);
 
         dataOut.write(fileData, 0, fileLength);
         dataOut.flush();
