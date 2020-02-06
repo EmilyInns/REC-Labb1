@@ -1,5 +1,3 @@
-package main.java;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,12 +11,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
 import java.util.StringTokenizer;
+import java.util.concurrent.Executors;
 
 // The tutorial can be found just here on the SSaurel's Blog :
 // https://www.ssaurel.com/blog/create-a-simple-http-web-server-in-java
 // Each Client Connection will be managed in a dedicated Thread
 public class JavaHTTPServer implements Runnable{
 
+    // config file
     static final File WEB_ROOT = new File(".");
     static final String DEFAULT_FILE = "index.html";
     static final String FILE_NOT_FOUND = "404.html";
@@ -47,10 +47,14 @@ public class JavaHTTPServer implements Runnable{
                 JavaHTTPServer myServer = new JavaHTTPServer(serverConnect.accept());
 
                 if (verbose) {
-                    System.out.println("Connecton opened. (" + new Date() + ")");
+                    System.out.println("Connection opened. (" + new Date() + ")");
                 }
 
                 // create dedicated thread to manage the client connection
+            // Executors.newCachedThreadPool();
+
+            // service.submit
+
                 Thread thread = new Thread(myServer);
                 thread.start();
             }
@@ -66,13 +70,16 @@ public class JavaHTTPServer implements Runnable{
         BufferedReader in = null; PrintWriter out = null; BufferedOutputStream dataOut = null;
         String fileRequested = null;
 
-        try {
+        try { //try (Socket socket = socket) {
             // we read characters from the client via input stream on the socket
             in = new BufferedReader(new InputStreamReader(connect.getInputStream()));
             // we get character output stream to client (for headers)
             out = new PrintWriter(connect.getOutputStream());
             // get binary output stream to client (for requested data)
             dataOut = new BufferedOutputStream(connect.getOutputStream());
+
+        // timeout
+        // loop
 
             // get first line of the request from the client
             String input = in.readLine();
@@ -82,6 +89,7 @@ public class JavaHTTPServer implements Runnable{
             // we get file requested
             fileRequested = parse.nextToken().toLowerCase();
 
+        // object oriented solution
             // we support only GET and HEAD methods, we check
             if (!method.equals("GET")  &&  !method.equals("HEAD")) {
                 if (verbose) {
@@ -113,6 +121,7 @@ public class JavaHTTPServer implements Runnable{
                     fileRequested += DEFAULT_FILE;
                 }
 
+                // if (file exits) {
                 File file = new File(WEB_ROOT, fileRequested);
                 int fileLength = (int) file.length();
                 String content = getContentType(fileRequested);
@@ -120,8 +129,11 @@ public class JavaHTTPServer implements Runnable{
                 if (method.equals("GET")) { // GET method so we return content
                     byte[] fileData = readFileData(file, fileLength);
 
+                // print header method or request object
+                // response object
+
                     // send HTTP Headers
-                    out.println("HTTP/1.1 200 OK");
+                    out.print("HTTP/1.1 200 OK\r\n");
                     out.println("Server: Java HTTP Server from SSaurel : 1.0");
                     out.println("Date: " + new Date());
                     out.println("Content-type: " + content);
@@ -189,9 +201,10 @@ public class JavaHTTPServer implements Runnable{
 
     private void fileNotFound(PrintWriter out, OutputStream dataOut, String fileRequested) throws IOException {
         File file = new File(WEB_ROOT, FILE_NOT_FOUND);
-        int fileLength = (int) file.length();
+
+        int fileLength = (int) file.length(); //long
         String content = "text/html";
-        byte[] fileData = readFileData(file, fileLength);
+        byte[] fileData = readFileData(file, fileLength); //only works with int
 
         out.println("HTTP/1.1 404 File Not Found");
         out.println("Server: Java HTTP Server from SSaurel : 1.0");
