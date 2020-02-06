@@ -121,7 +121,7 @@ public class JavaHTTPServer implements Runnable{
             } else {
                 // GET or HEAD method
                 if (fileRequested.endsWith("/")) {
-                    fileRequested += DEFAULT_FILE;
+                    fileRequested += DEFAULT_FILE.replace("\"", "");
                 }
 
                 // if (file exits) {
