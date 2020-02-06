@@ -22,8 +22,8 @@ public class JavaHTTPServer implements Runnable{
     // config file
 //    static Object o = config.jsonReader().get("WEB_ROOT");
 //    static final File WEB_ROOT = new File(config.jsonReader().get("WEB_ROOT").toString()); //doesnt work!!
-    static String webRoot = config.jsonReader().get("WEB_ROOT").toString().replace("\"", "");
-    static final File WEB_ROOT = new File(webRoot);
+//    static String webRoot = config.jsonReader().get("WEB_ROOT").toString().replace("\"", ""); //unnecessary
+    static final File WEB_ROOT = new File(config.jsonReader().get("WEB_ROOT").toString().replace("\"", ""));
     static final String DEFAULT_FILE = (String) config.jsonReader().get("DEFAULT_FILE").toString();
     static final String FILE_NOT_FOUND = (String) config.jsonReader().get("FILE_NOT_FOUND").toString();
     static final String METHOD_NOT_SUPPORTED = (String) config.jsonReader().get("METHOD_NOT_SUPPORTED").toString();
