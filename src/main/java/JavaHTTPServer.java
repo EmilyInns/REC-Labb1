@@ -18,13 +18,16 @@ import java.util.concurrent.Executors;
 // Each Client Connection will be managed in a dedicated Thread
 public class JavaHTTPServer implements Runnable{
 
+    static FRead config = new FRead();
     // config file
+//    static Object o = config.jsonReader().get("WEB_ROOT");
+//    static final File WEB_ROOT = new File(config.jsonReader().get("WEB_ROOT").toString()); //doesnt work!!
     static final File WEB_ROOT = new File(".");
-    static final String DEFAULT_FILE = "index.html";
-    static final String FILE_NOT_FOUND = "404.html";
-    static final String METHOD_NOT_SUPPORTED = "not_supported.html";
+    static final String DEFAULT_FILE = (String) config.jsonReader().get("DEFAULT_FILE").toString();
+    static final String FILE_NOT_FOUND = (String) config.jsonReader().get("FILE_NOT_FOUND").toString();
+    static final String METHOD_NOT_SUPPORTED = (String) config.jsonReader().get("METHOD_NOT_SUPPORTED").toString();
     // port to listen connection
-    static final int PORT = 8080;
+    static final int PORT = Integer.parseInt(config.jsonReader().get("PORT").toString());
 
     // verbose mode
     static final boolean verbose = true;
@@ -44,6 +47,7 @@ public class JavaHTTPServer implements Runnable{
             // we listen until user halts server execution
             while (true) {
                 JavaHTTPServer myServer = new JavaHTTPServer(serverConnect.accept());
+                FRead r = new FRead();
 
                 if (verbose) {
                     System.out.println("Connection opened. (" + new Date() + ")");
@@ -199,7 +203,7 @@ public class JavaHTTPServer implements Runnable{
     }
 
     private void fileNotFound(PrintWriter out, OutputStream dataOut, String fileRequested) throws IOException {
-        File file = new File(WEB_ROOT, FILE_NOT_FOUND);
+        File file = new File(WEB_ROOT.toString(), FILE_NOT_FOUND.replace("\"",""));
 
         int fileLength = (int) file.length(); //long
         String content = "text/html";
