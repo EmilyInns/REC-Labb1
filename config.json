@@ -1,6 +1,6 @@
 {
   "WEB_ROOT": ".",
-  "DEFAULT_FILE": "website/index.html",
+  "DEFAULT_FILE": "index.html",
   "FILE_NOT_FOUND": "404.html",
   "METHOD_NOT_SUPPORTED": "not_supported.html",
   "PORT": 8080
