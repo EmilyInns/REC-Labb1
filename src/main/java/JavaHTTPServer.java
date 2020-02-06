@@ -86,6 +86,7 @@ public class JavaHTTPServer implements Runnable {
         PrintWriter out = null;
         BufferedOutputStream dataOut = null;
         String fileRequested = null;
+        String method = "";
 
         try { //try (Socket socket = socket) {
             // we read characters from the client via input stream on the socket
@@ -103,7 +104,7 @@ public class JavaHTTPServer implements Runnable {
             String input = in.readLine();
             // we parse the request with a string tokenizer
             StringTokenizer parse = new StringTokenizer(input);
-            String method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
+            method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
             // we get file requested
             fileRequested = parse.nextToken().toLowerCase();
 
@@ -124,8 +125,8 @@ public class JavaHTTPServer implements Runnable {
                 // we send HTTP Headers with data to client
                 Header fiveOhOne = new Header(out, "501 Not implemented", contentMimeType, fileLength);
                 // file
-                dataOut.write(fileData, 0, fileLength);
-                dataOut.flush();
+                    dataOut.write(fileData, 0, fileLength);
+                    dataOut.flush();
 
             } else {
                 // GET or HEAD method
@@ -138,16 +139,18 @@ public class JavaHTTPServer implements Runnable {
                 int fileLength = (int) file.length();
                 String content = getContentType(fileRequested);
 
-                if (method.equals("GET")) { // GET method so we return content
+                if (method.equals("GET") || method.equals("HEAD")) { // GET method so we return content
                     byte[] fileData = readFileData(file, fileLength);
 
-                    // print header method or request object
+                    // print header method or request object DONE
                     // response object
 
                     // send HTTP Headers
                     Header twoOhOh = new Header(out, "200 OK", content, fileLength);
-                    dataOut.write(fileData, 0, fileLength);
-                    dataOut.flush();
+                    if (method.equals("GET")) {
+                        dataOut.write(fileData, 0, fileLength);
+                        dataOut.flush();
+                    }
                 }
 
                 if (verbose) {
@@ -158,7 +161,7 @@ public class JavaHTTPServer implements Runnable {
 
         } catch (FileNotFoundException fnfe) {
             try {
-                fileNotFound(out, dataOut, fileRequested);
+                fileNotFound(out, dataOut, fileRequested,method);
             } catch (IOException ioe) {
                 System.err.println("Error with file not found exception : " + ioe.getMessage());
             }
@@ -204,7 +207,7 @@ public class JavaHTTPServer implements Runnable {
             return "text/plain";
     }
 
-    private void fileNotFound(PrintWriter out, OutputStream dataOut, String fileRequested) throws IOException {
+    private void fileNotFound(PrintWriter out, OutputStream dataOut, String fileRequested, String method) throws IOException {
         File file = new File(WEB_ROOT.toString(), FILE_NOT_FOUND.replace("\"", ""));
 
         int fileLength = (int) file.length(); //long
@@ -213,11 +216,22 @@ public class JavaHTTPServer implements Runnable {
 
         Header fourOhFour = new Header(out, "404 File Not Found", content,fileLength);
 
-        dataOut.write(fileData, 0, fileLength);
-        dataOut.flush();
+        if (method.equals("GET")) {
+            dataOut.write(fileData, 0, fileLength);
+            dataOut.flush();
+        }
 
         if (verbose) {
             System.out.println("File " + fileRequested + " not found");
         }
     }
 }
+
+// TODO: 2020-02-06
+//  HEAD
+//  response object
+//  header
+//  read multiple text files(html, css, js, pdf)
+//  1 or more image file type
+//  post / input parameters in URL get json
+//  (index)create one or more static web pages with info about what the server can do and show access to json info
