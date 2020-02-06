@@ -11,7 +11,7 @@ public class FRead {
     }
 
     public Map<String,Object> jsonReader() {
-        File file = new File("C:\\Users\\Christoffer Clausen\\IdeaProjects\\WebServicesLabb1\\REC-Labb1\\new 1");
+        File file = new File(".\\config.json");
         JsonReader reader = null;
         try {
             reader = Json.createReader(new FileReader(file));
