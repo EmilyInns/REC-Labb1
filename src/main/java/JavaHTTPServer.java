@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.regex.Pattern;
 
 // The tutorial can be found just here on the SSaurel's Blog :
 // https://www.ssaurel.com/blog/create-a-simple-http-web-server-in-java
@@ -125,8 +126,8 @@ public class JavaHTTPServer implements Runnable {
                 // we send HTTP Headers with data to client
                 Header fiveOhOne = new Header(out, "501 Not implemented", contentMimeType, fileLength);
                 // file
-                    dataOut.write(fileData, 0, fileLength);
-                    dataOut.flush();
+                dataOut.write(fileData, 0, fileLength);
+                dataOut.flush();
 
             } else {
                 // GET or HEAD method
@@ -161,7 +162,7 @@ public class JavaHTTPServer implements Runnable {
 
         } catch (FileNotFoundException fnfe) {
             try {
-                fileNotFound(out, dataOut, fileRequested,method);
+                fileNotFound(out, dataOut, fileRequested, method);
             } catch (IOException ioe) {
                 System.err.println("Error with file not found exception : " + ioe.getMessage());
             }
@@ -203,7 +204,15 @@ public class JavaHTTPServer implements Runnable {
     private String getContentType(String fileRequested) {
         if (fileRequested.endsWith(".htm") || fileRequested.endsWith(".html"))
             return "text/html";
-        else
+        else if (fileRequested.endsWith(".js")) {
+            return "text/javascript";
+        } else if (fileRequested.endsWith(".pdf")) {
+            return "application/pdf";
+        } else if (fileRequested.endsWith(".css")) {
+            return "text/css";
+        } else if (fileRequested.endsWith(".json")) {
+            return "application/json";
+        } else
             return "text/plain";
     }
 
@@ -214,7 +223,7 @@ public class JavaHTTPServer implements Runnable {
         String content = "text/html";
         byte[] fileData = readFileData(file, fileLength); //only works with int
 
-        Header fourOhFour = new Header(out, "404 File Not Found", content,fileLength);
+        Header fourOhFour = new Header(out, "404 File Not Found", content, fileLength);
 
         if (method.equals("GET")) {
             dataOut.write(fileData, 0, fileLength);
