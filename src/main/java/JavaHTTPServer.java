@@ -1,5 +1,3 @@
-import jdk.swing.interop.SwingInterOpUtils;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,7 +14,6 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.regex.Pattern;
 
 // The tutorial can be found just here on the SSaurel's Blog :
 // https://www.ssaurel.com/blog/create-a-simple-http-web-server-in-java
@@ -34,6 +31,8 @@ public class JavaHTTPServer implements Runnable {
     static final String METHOD_NOT_SUPPORTED = (String) config.jsonReader().get("METHOD_NOT_SUPPORTED").toString();
     // port to listen connection
     static final int PORT = Integer.parseInt(config.jsonReader().get("PORT").toString());
+
+    static final String serverName = "ServerName";
 
     // verbose mode
     static final boolean verbose = true;
@@ -124,7 +123,7 @@ public class JavaHTTPServer implements Runnable {
                 byte[] fileData = readFileData(file, fileLength);
 
                 // we send HTTP Headers with data to client
-                Header fiveOhOne = new Header(out, "501 Not implemented", contentMimeType, fileLength);
+                Header fiveOhOne = new Header(out, serverName + "501","501 Not implemented", contentMimeType, fileLength);
                 // file
                 dataOut.write(fileData, 0, fileLength);
                 dataOut.flush();
@@ -147,7 +146,7 @@ public class JavaHTTPServer implements Runnable {
                     // response object
 
                     // send HTTP Headers
-                    Header twoOhOh = new Header(out, "200 OK", content, fileLength);
+                    Header twoOhOh = new Header(out, serverName + "200", "200 OK", content, fileLength);
                     if (method.equals("GET")) {
                         dataOut.write(fileData, 0, fileLength);
                         dataOut.flush();
@@ -223,7 +222,7 @@ public class JavaHTTPServer implements Runnable {
         String content = "text/html";
         byte[] fileData = readFileData(file, fileLength); //only works with int
 
-        Header fourOhFour = new Header(out, "404 File Not Found", content, fileLength);
+        Header fourOhFour = new Header(out, serverName + "404", "404 File Not Found", content, fileLength);
 
         if (method.equals("GET")) {
             dataOut.write(fileData, 0, fileLength);
@@ -237,10 +236,13 @@ public class JavaHTTPServer implements Runnable {
 }
 
 // TODO: 2020-02-06
-//  HEAD
 //  response object
 //  header
 //  read multiple text files(html, css, js, pdf)
 //  1 or more image file type
 //  post / input parameters in URL get json
 //  (index)create one or more static web pages with info about what the server can do and show access to json info
+
+// TODO: 2020-02-11 change name for serverName
+
+// TODO: 2020-02-11 modules
