@@ -1,5 +1,5 @@
 {
-  "WEB_ROOT": ".",
+  "WEB_ROOT": "web",
   "DEFAULT_FILE": "index.html",
   "FILE_NOT_FOUND": "404.html",
   "METHOD_NOT_SUPPORTED": "501.html",

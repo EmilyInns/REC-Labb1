@@ -238,7 +238,6 @@ public class JavaHTTPServer implements Runnable {
 
 // TODO: 2020-02-06
 //  response object
-//  header
 //  read multiple text files(html, css, js, pdf) done?
 //  1 or more image file type
 //  post / input parameters in URL get json
