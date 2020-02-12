@@ -70,7 +70,6 @@ public class JavaHTTPServer implements Runnable {
                         });
                 service.shutdown();
 
-
                 Thread thread = new Thread(myServer);
                 thread.start();
             }
@@ -111,7 +110,7 @@ public class JavaHTTPServer implements Runnable {
 
             // object oriented solution
             // we support only GET and HEAD methods, we check
-            if (!method.equals("GET") && !method.equals("HEAD")) {
+            if (!method.equals("GET") && !method.equals("HEAD") && !method.equals("POST")) {
                 if (verbose) {
                     System.out.println("501 Not Implemented : " + method + " method.");
                 }
@@ -124,11 +123,10 @@ public class JavaHTTPServer implements Runnable {
                 byte[] fileData = readFileData(file, fileLength);
 
                 // we send HTTP Headers with data to client
-                Header fiveOhOne = new Header(out, serverName + "501","501 Not implemented", contentMimeType, fileLength);
+                Header fiveOhOne = new Header(out, serverName + "501", "501 Not implemented", contentMimeType, fileLength);
                 // file
                 dataOut.write(fileData, 0, fileLength);
                 dataOut.flush();
-
             } else {
                 // GET or HEAD method
                 if (fileRequested.endsWith("/")) {
@@ -152,6 +150,8 @@ public class JavaHTTPServer implements Runnable {
                         dataOut.write(fileData, 0, fileLength);
                         dataOut.flush();
                     }
+                } else if (method.equals("POST")) {
+                    createJson(fileRequested);
                 }
 
                 if (verbose) {
@@ -233,6 +233,10 @@ public class JavaHTTPServer implements Runnable {
         if (verbose) {
             System.out.println("File " + fileRequested + " not found");
         }
+    }
+
+    private void createJson(String url) {
+        DocWriter.writeJsonFromURL(url);
     }
 }
 
