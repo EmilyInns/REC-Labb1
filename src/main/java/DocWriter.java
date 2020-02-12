@@ -1,16 +1,10 @@
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonWriter;
-import javax.json.JsonWriterFactory;
+import javax.json.*;
 import javax.json.stream.JsonGenerator;
-import java.io.IOException;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.lang.reflect.Array;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DocWriter {
@@ -21,6 +15,28 @@ public class DocWriter {
         for (String s : strings) {
             System.out.println(s);
         }
+        
+        File file = new File("file.json");
+//        file.getParentFile().mkdirs();
+        
+        Map< String, Boolean > config = new HashMap< String, Boolean >();
+        config.put(JsonGenerator.PRETTY_PRINTING, true);
+        JsonWriterFactory jwf = Json.createWriterFactory(config);
+
+        Writer writer = null;
+        try {
+            writer = new PrintWriter(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        JsonWriter jWriter = jwf.createWriter(writer);
+        JsonObjectBuilder job = Json.createObjectBuilder();
+        for (String s : strings) {
+            job.add( s.substring(0,s.indexOf("=")), s.substring(s.indexOf("=")+1) );
+            System.out.println(job.toString());
+        }
+        jWriter.writeObject(job.build());
+        jWriter.close();
 
 //            Json jsonFile = ;
 //            Map<String, Boolean> config = new HashMap<String, Boolean>()
