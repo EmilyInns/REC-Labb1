@@ -22,50 +22,50 @@ public class DocWriter {
             builder.add(s1, s2);
         }
         JsonObject jo = builder.build();
-        System.out.println(jo);
-        System.out.println("done building jsonFile");
-        System.out.println("json:" + jo.toString());
+//        System.out.println(jo);
+//        System.out.println("done building jsonFile");
+//        System.out.println("json:" + jo.toString());
 
         return jo;
     }
 
-    static void parseAndPrint(String jsonString) throws FileNotFoundException {
-        try {
-            JsonReader reader = Json.createReader(new FileReader(jsonString));
-            JsonStructure jsonStruct = reader.read();
-            reader.close();
-            System.out.println(jsonString);
-
-            if (jsonStruct.getValueType().equals(OBJECT)) {
-                JsonObject jo = (JsonObject) jsonStruct;
-                System.out.println(jo.getString("firstName"));
-                System.out.println(jo.getString("lastName"));
-                System.out.println(jo.getInt("age"));
-                System.out.println(jo.getString("streetAdress", "Adress"));
-                System.out.println(jo.getString("city", "City"));
-                System.out.println(jo.getString("state", "State"));
-                System.out.println(jo.getString("postalCode", "Postal code"));
-                JsonArray arr = jo.getJsonArray("phoneNumbers");
-                for (JsonValue jv : arr) {
-                    if (((JsonObject) jv).keySet().contains("Mobile")) {
-                        String mobile = ((JsonObject) jv).getString("Mobile");
-                        if (mobile != null) {
-                            System.out.println(mobile);
-                        }
-                    }
-                    if (((JsonObject) jv).keySet().contains("Home")) {
-                        String home = ((JsonObject) jv).getString("Home");
-                        if (home != null) {
-                            System.out.println(home);
-                        }
-                    }
-                }
-            }
-
-        } catch (FileNotFoundException e) {
-            throw e;
-        }
-    }
+//    static void parseAndPrint(String jsonString) throws FileNotFoundException {
+//        try {
+//            JsonReader reader = Json.createReader(new FileReader(jsonString));
+//            JsonStructure jsonStruct = reader.read();
+//            reader.close();
+//            System.out.println(jsonString);
+//
+//            if (jsonStruct.getValueType().equals(OBJECT)) {
+//                JsonObject jo = (JsonObject) jsonStruct;
+//                System.out.println(jo.getString("firstName"));
+//                System.out.println(jo.getString("lastName"));
+//                System.out.println(jo.getInt("age"));
+//                System.out.println(jo.getString("streetAdress", "Adress"));
+//                System.out.println(jo.getString("city", "City"));
+//                System.out.println(jo.getString("state", "State"));
+//                System.out.println(jo.getString("postalCode", "Postal code"));
+//                JsonArray arr = jo.getJsonArray("phoneNumbers");
+//                for (JsonValue jv : arr) {
+//                    if (((JsonObject) jv).keySet().contains("Mobile")) {
+//                        String mobile = ((JsonObject) jv).getString("Mobile");
+//                        if (mobile != null) {
+//                            System.out.println(mobile);
+//                        }
+//                    }
+//                    if (((JsonObject) jv).keySet().contains("Home")) {
+//                        String home = ((JsonObject) jv).getString("Home");
+//                        if (home != null) {
+//                            System.out.println(home);
+//                        }
+//                    }
+//                }
+//            }
+//
+//        } catch (FileNotFoundException e) {
+//            throw e;
+//        }
+//    }
     //   System.out.println(jo.toString() + "                 2");
 //        }
 
