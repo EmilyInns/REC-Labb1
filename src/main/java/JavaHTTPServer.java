@@ -2,10 +2,11 @@ import javax.json.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class JavaHTTPServer implements Runnable {
 
@@ -28,31 +29,46 @@ public class JavaHTTPServer implements Runnable {
 
     public static void main(String[] args) {
         try {
+
+            ExecutorService service = Executors.newCachedThreadPool();
+//            ThreadPoolExecutor threadPool = (ThreadPoolExecutor) service;
+
             ServerSocket serverConnect = new ServerSocket(PORT);
             System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
+//            JavaHTTPServer myServer = new JavaHTTPServer(serverConnect.accept());
 
             while (true) {
-                JavaHTTPServer myServer = new JavaHTTPServer(serverConnect.accept());
-
-                if (verbose) {
-                    System.out.println("Connection opened. (" + new Date() + ")");
+                Thread thread = new Thread();
+                try {
+                    thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-
-                // create dedicated thread to manage the client connection
-                // problem for now
-
-
-                ExecutorService service = Executors.newCachedThreadPool();
-                ThreadPoolExecutor threadPool = (ThreadPoolExecutor) service;
-//                threadPool.submit();
-                service.execute(
-                        () -> {
-                            System.out.println("Do something");
-                        });
-                service.shutdown();
-
-                Thread thread = new Thread(myServer);
-                thread.start();
+                if (true) {
+                    service.execute(
+                            () -> {
+                                try {
+                                    serverConnect.setSoTimeout(100);
+//                                if (serverConnect.isClosed())
+                                    System.out.println("serverConnect terminated");
+                                } catch (SocketException e) {
+                                    e.printStackTrace();
+                                }
+                                try {
+                                    if (verbose) {
+                                        System.out.println("Connection opened. (" + new Date() + ")");
+                                    }
+                                    new JavaHTTPServer(serverConnect.accept()).run();
+                                } catch (SocketTimeoutException e) {
+//                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                }
+                if (serverConnect.isClosed()) {
+                    service.shutdown();
+                }
             }
 
         } catch (IOException e) {
@@ -187,6 +203,7 @@ public class JavaHTTPServer implements Runnable {
             }
 
             if (verbose) {
+
                 System.out.println("Connection closed.\n");
             }
         }
