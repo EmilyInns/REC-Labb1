@@ -145,6 +145,12 @@ public class JavaHTTPServer implements Runnable {
 //                    System.out.println("file: " + file);
 //                    System.out.println("file length: " + fileLength);
 
+                    if(method.equals("HEAD")){
+                        Header twoOhOhHead = new Header(out, serverName + "200", "200 OK", content, fileLength);
+                    }
+
+
+
                     // print header method or request object DONE
                     // response object
                     // send HTTP Headers
