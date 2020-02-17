@@ -22,6 +22,16 @@ public class DocWriter {
             builder.add(s1, s2);
         }
         JsonObject jo = builder.build();
+        try {
+            FileWriter fileWriter = new FileWriter("web/file.json");
+            System.out.println(jo.toString());
+            fileWriter.write(jo.toString());
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
 //        System.out.println(jo);
 //        System.out.println("done building jsonFile");
 //        System.out.println("json:" + jo.toString());
