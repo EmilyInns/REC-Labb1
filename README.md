@@ -3,7 +3,7 @@ Mål: Få en förståelse för hur en webbserver är uppbyggd, hur HTTP-protokol
 
   <h1 align="center"> :star2: Developers :star2: </h1>
   <p align="center">
-  &emsp; &emsp;&emsp; Christoffer Clausen      <br />
-  &emsp; &emsp;&emsp; Rickard Forslund      <br />
-  &emsp; &emsp;&emsp; Emily Inns      <br />
+Christoffer Clausen<br/>
+Rickard Forslund<br/>
+Emily Inns<br/>
 </p>
