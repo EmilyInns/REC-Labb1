@@ -3,9 +3,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class JavaHTTPServer implements Runnable {
 
@@ -38,19 +35,6 @@ public class JavaHTTPServer implements Runnable {
                     System.out.println("Connection opened. (" + new Date() + ")");
                 }
 
-                // create dedicated thread to manage the client connection
-                // problem for now
-
-
-                ExecutorService service = Executors.newCachedThreadPool();
-                ThreadPoolExecutor threadPool = (ThreadPoolExecutor) service;
-//                threadPool.submit();
-                service.execute(
-                        () -> {
-                            System.out.println("Do something");
-                        });
-                service.shutdown();
-
                 Thread thread = new Thread(myServer);
                 thread.start();
             }
@@ -74,9 +58,6 @@ public class JavaHTTPServer implements Runnable {
             dataOut = new BufferedOutputStream(connect.getOutputStream());
 
             connect.setSoTimeout(10000); //
-            // TODO: 2020-02-13 loop
-            // TODO: 2020-02-13 timeout
-//            connection.setSoTImeout();
 
             String input = in.readLine();
             StringTokenizer parse = new StringTokenizer(input);
@@ -93,7 +74,7 @@ public class JavaHTTPServer implements Runnable {
                 String contentMimeType = "text/html";
                 byte[] fileData = readFileData(file, fileLength);
 
-                Header fiveOhOne = new Header(out, serverName + "501", "501 Not implemented", contentMimeType, fileLength);
+                Header page501 = new Header(out, serverName + "501", "501 Not implemented", contentMimeType, fileLength);
                 dataOut.write(fileData, 0, fileLength);
                 dataOut.flush();
             } else {
@@ -121,7 +102,6 @@ public class JavaHTTPServer implements Runnable {
 
                             JsonObject jo = DocWriter.writeJsonFromParam(param);
                             if (fileRequested.endsWith("jsonpage.html")) {
-                                System.out.println("Params: " + param);
                                 content = getContentType(".json");
                             } else {
                                 content = getContentType(fileRequested);
@@ -130,7 +110,7 @@ public class JavaHTTPServer implements Runnable {
                             dataOut.write(fileData, 0, fileLength);
                             dataOut.flush();
                         } else if (method.equals("GET")) {
-                            Header twoOhOh = new Header(out, serverName + "200", "200 OK", content, fileLength);
+                            Header page200 = new Header(out, serverName + "200", "200 OK", content, fileLength);
                             dataOut.write(fileData, 0, fileLength);
                             dataOut.flush();
                         } else if (method.equals("POST")) {
@@ -157,7 +137,7 @@ public class JavaHTTPServer implements Runnable {
                             dataOut.flush();
                         }
                     } else if (method.equals("GET")) {
-                        Header twoOhOh = new Header(out, serverName + "200", "200 OK", content, fileLength);
+                        Header page200 = new Header(out, serverName + "200", "200 OK", content, fileLength);
                     }
                 }
 
@@ -234,7 +214,7 @@ public class JavaHTTPServer implements Runnable {
         String content = "text/html";
         byte[] fileData = readFileData(file, fileLength);
 
-        Header fourOhFour = new Header(out, serverName + "404", "404 File Not Found", content, fileLength);
+        Header page404 = new Header(out, serverName + "404", "404 File Not Found", content, fileLength);
 
         if (method.equals("GET")) {
             dataOut.write(fileData, 0, fileLength);
@@ -245,13 +225,4 @@ public class JavaHTTPServer implements Runnable {
             System.out.println("File " + fileRequested + " not found");
         }
     }
-
-    private void createJson(String url) {
-        System.out.println("Sending to dockWriter, rad 254");
-        System.out.println(url);
-    }
 }
-
-// TODO: 2020-02-06
-//  response object
-// TODO: 2020-02-11 change name for serverName

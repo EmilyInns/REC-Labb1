@@ -12,7 +12,6 @@ public class DocReader {
         File file = new File(".\\config.json");
         JsonReader reader = null;
         try {
-            System.out.println("Creating reader in Docreader");
             reader = Json.createReader(new FileReader(file));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -24,7 +23,6 @@ public class DocReader {
         for (Map.Entry<String, JsonValue> e : jso.entrySet()) {
             map.put(e.getKey(), (e.getValue().toString().replace("\"", "")));
         }
-        System.out.println("Returning map from dockReader");
         return map;
     }
 }
