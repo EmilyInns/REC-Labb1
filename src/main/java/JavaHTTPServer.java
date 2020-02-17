@@ -172,11 +172,12 @@ public class JavaHTTPServer implements Runnable {
                                 params[i] = param.charAt(i);
                             }
                             System.out.println("row 165, file requested:" + fileRequested);
-                            fileRequested = fileRequested.replace(fileRequested.substring(fileRequested.indexOf("/")), "/response.json");
+//                            fileRequested = fileRequested.replace(fileRequested.substring(fileRequested.indexOf("/")), "/response.json");
+                            JsonObject jo = DocWriter.writeJsonFromParam(param);
                             System.out.println("row 167, file requested:" + fileRequested);
                             content = getContentType(fileRequested);
                             System.out.println("content row 170: " + content);
-                            Header getWithParams = new Header(out, serverName + "200", "200 OK", content, fileLength, params);
+                            Header getWithParams = new Header(out, serverName + "200", "200 OK", content, fileLength, jo);
                             dataOut.write(fileData, 0, fileLength);
                             dataOut.flush();
                         } else if (method.equals("GET")) {
@@ -209,7 +210,7 @@ public class JavaHTTPServer implements Runnable {
                             }
                             System.out.println(fileBody);
                             System.out.println("row 197, file requested:" + fileRequested);
-                            fileRequested = fileRequested.replace(fileRequested.substring(fileRequested.indexOf("/")), "/response.json");
+//                            fileRequested = fileRequested.replace(fileRequested.substring(fileRequested.indexOf("/")), "/response.json");
                             System.out.println("row 199, file requested:" + fileRequested);
                             content = getContentType(fileRequested);
                             Header twoOhOh = new Header(out, serverName + "200", "200 OK", content, fileLength + fileBody.length, fileBody);

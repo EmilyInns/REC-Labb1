@@ -7,48 +7,26 @@ import java.util.Map;
 import static javax.json.JsonValue.ValueType.OBJECT;
 
 public class DocWriter {
-    public static void writeJsonFromURL(String url) {
+    public static JsonObject writeJsonFromParam(String param) {
 
         File jsonFile = new File("file.json");
-//        parseAndPrint(jsonFile);
+        String[] strings = new String[param.length()];
+        strings = param.split("[&]");
 
-        System.out.println("In DocWriter");
-        System.out.println("innan substring" + url);
-//        if (url.contains("?")) {
-        url = url.substring(url.indexOf("?"));
-        System.out.println("före split" + url);
-        String[] strings = url.split("[&]");
-        System.out.println("efter split" + url);
-        for (String s : strings) {
-            System.out.println("21" + s);
-        }
-
-//        File file = new File("file.json");
         Map<String, Boolean> config = new HashMap<String, Boolean>();
         config.put(JsonGenerator.PRETTY_PRINTING, true);
-        JsonWriterFactory jwf = Json.createWriterFactory(config);
-        Writer writer = null;
-//        try {
-//            writer = new PrintWriter(file);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-        JsonWriter jWriter = jwf.createWriter(writer);
-        JsonObjectBuilder job = Json.createObjectBuilder();
-        System.out.println("Adding to json object in docWriter");
-        JsonObject jo = job.build();
+        JsonObjectBuilder builder = Json.createObjectBuilder();
         for (String s : strings) {
-            System.out.println(s.substring(0, s.indexOf("=")));
-            System.out.println(s.substring(s.indexOf("=") + 1));
-            job.add(s.substring(0, s.indexOf("=")), s.substring(s.indexOf("=") + 1));
-            System.out.println(job.toString() + "         13413");
+            String s1 = s.substring(0, s.indexOf("="));
+            String s2 = s.substring(s.indexOf("=") + 1);
+            builder.add(s1, s2);
         }
-        jWriter.writeObject(job.build());
-//        jo = job.build();
-        jWriter.close();
+        JsonObject jo = builder.build();
+        System.out.println(jo);
         System.out.println("done building jsonFile");
         System.out.println("json:" + jo.toString());
 
+        return jo;
     }
 
     static void parseAndPrint(String jsonString) throws FileNotFoundException {
