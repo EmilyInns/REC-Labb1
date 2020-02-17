@@ -1,16 +1,9 @@
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import javax.json.*;
+import javax.json.stream.JsonGenerator;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -22,10 +15,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class JavaHTTPServer implements Runnable {
 
     static DocReader config = new DocReader();
-    // config file
-//    static Object o = config.jsonReader().get("WEB_ROOT");
-//    static final File WEB_ROOT = new File(config.jsonReader().get("WEB_ROOT").toString()); //doesnt work!!
-//    static String webRoot = config.jsonReader().get("WEB_ROOT").toString().replace("\"", ""); //unnecessary
     static final File WEB_ROOT = new File(config.jsonReader().get("WEB_ROOT").toString());
     static final String DEFAULT_FILE = (String) config.jsonReader().get("DEFAULT_FILE").toString();
     static final String FILE_NOT_FOUND = (String) config.jsonReader().get("FILE_NOT_FOUND").toString();
@@ -99,6 +88,9 @@ public class JavaHTTPServer implements Runnable {
             connect.setSoTimeout(10000); //
             // timeout
             // loop
+            // TODO: 2020-02-13 loop
+            // TODO: 2020-02-13 timeout
+//            connection.setSoTImeout();
 
             // get first line of the request from the client
             String input = in.readLine();
@@ -106,10 +98,14 @@ public class JavaHTTPServer implements Runnable {
             StringTokenizer parse = new StringTokenizer(input);
             method = parse.nextToken().toUpperCase(); // we get the HTTP method of the client
             // we get file requested
+            System.out.println("Getting file requested:");
             fileRequested = parse.nextToken().toLowerCase();
+            System.out.println("File requested:" + fileRequested);
 
             // object oriented solution
             // we support only GET and HEAD methods, we check
+            System.out.println("Checking method");
+            System.out.println("rad 112 Method:" + method.toString());
             if (!method.equals("GET") && !method.equals("HEAD") && !method.equals("POST")) {
                 if (verbose) {
                     System.out.println("501 Not Implemented : " + method + " method.");
@@ -129,29 +125,92 @@ public class JavaHTTPServer implements Runnable {
                 dataOut.flush();
             } else {
                 // GET or HEAD method
+                String param = null;
                 if (fileRequested.endsWith("/")) {
                     fileRequested += DEFAULT_FILE.replace("\"", "");
+                } else if (fileRequested.contains("?")) {
+                    System.out.println("!!!!!!!!!!!!!!!" + fileRequested);
+                    param = fileRequested.substring(fileRequested.indexOf("?") + 1);
+                    fileRequested = fileRequested.substring(0, fileRequested.indexOf(param) - 1);
                 }
 
                 // if (file exits) {
                 File file = new File(WEB_ROOT, fileRequested);
                 int fileLength = (int) file.length();
                 String content = getContentType(fileRequested);
+                System.out.println("content row: 141   " + content);
 
-                if (method.equals("GET") || method.equals("HEAD")) { // GET method so we return content
-                    byte[] fileData = readFileData(file, fileLength);
+                if (method.equals("GET") || method.equals("HEAD") || method.equals("POST")) { // GET method so we return content
+                    System.out.println("rad 142 Method:" + method.toString());
+//                    System.out.println("file: " + file);
+//                    System.out.println("file length: " + fileLength);
 
                     // print header method or request object DONE
                     // response object
-
                     // send HTTP Headers
-                    Header twoOhOh = new Header(out, serverName + "200", "200 OK", content, fileLength);
-                    if (method.equals("GET")) {
-                        dataOut.write(fileData, 0, fileLength);
-                        dataOut.flush();
+//                    createJson(fileRequested);
+//                    File body = new File(fileRequested);
+//                    System.out.println("Going to fileData");
+                    System.out.println("In 200 OK");
+                    if (method.equals("GET") || method.equals("POST")) {
+                        System.out.println("in GET or POST");
+                        byte[] fileData = readFileData(file, fileLength);
+                        if (param == null) System.out.println("param is null");
+                        else if (param != null) System.out.println("param is not null");
+                        if (method.equals("GET") && param != null) {
+                            System.out.println("Params: " + param);
+                            char params[] = new char[param.length()];
+                            for (int i = 0; i < param.length(); i++) {
+                                params[i] = param.charAt(i);
+                            }
+                            System.out.println("row 165, file requested:" + fileRequested);
+                            fileRequested = fileRequested.replace(fileRequested.substring(fileRequested.indexOf("/")), "/response.json");
+                            System.out.println("row 167, file requested:" + fileRequested);
+                            content = getContentType(fileRequested);
+                            System.out.println("content row 170: " + content);
+                            Header getWithParams = new Header(out, serverName + "200", "200 OK", content, fileLength, params);
+                            dataOut.write(fileData, 0, fileLength);
+                            dataOut.flush();
+                        } else if (method.equals("GET")) {
+                            Header twoOhOh = new Header(out, serverName + "200", "200 OK", content, fileLength);
+                            dataOut.write(fileData, 0, fileLength);
+                            dataOut.flush();
+                            /*
+                            char[] chars = new char[request.getContentLength];
+                            int i = in.read(chars);
+                            parseParams(request, new String(chars));
+                            */
+                        } else if (method.equals("POST")) {
+                            StringBuilder sb = new StringBuilder();
+                            int charNum = in.read();
+                            char theChar = '.';
+
+                            while (theChar != '}') {
+                                theChar = (char) charNum;
+//                                System.out.print(theChar);
+                                sb.append(theChar);
+                                if (theChar != '}') {
+                                    charNum = in.read();
+                                }
+                            }
+                            String s = sb.toString();
+                            s = s.substring(s.indexOf("{"));
+                            char fileBody[] = new char[s.length()];
+                            for (int i = 0; i < s.length(); i++) {
+                                fileBody[i] = s.charAt(i);
+                            }
+                            System.out.println(fileBody);
+                            System.out.println("row 197, file requested:" + fileRequested);
+                            fileRequested = fileRequested.replace(fileRequested.substring(fileRequested.indexOf("/")), "/response.json");
+                            System.out.println("row 199, file requested:" + fileRequested);
+                            content = getContentType(fileRequested);
+                            Header twoOhOh = new Header(out, serverName + "200", "200 OK", content, fileLength + fileBody.length, fileBody);
+                            dataOut.write(fileData, 0, fileLength);
+                            dataOut.flush();
+                        }
+                    } else if (method.equals("GET")) {
+                        Header twoOhOh = new Header(out, serverName + "200", "200 OK", content, fileLength);
                     }
-                } else if (method.equals("POST")) {
-                    createJson(fileRequested);
                 }
 
                 if (verbose) {
@@ -216,7 +275,9 @@ public class JavaHTTPServer implements Runnable {
             return "text/plain";
     }
 
-    private void fileNotFound(PrintWriter out, OutputStream dataOut, String fileRequested, String method) throws IOException {
+    private void fileNotFound(PrintWriter out, OutputStream dataOut, String fileRequested, String method) throws
+            IOException {
+//        System.out.println("404 fuck you");
         File file = new File(WEB_ROOT.toString(), FILE_NOT_FOUND.replace("\"", ""));
 
         int fileLength = (int) file.length(); //long
@@ -236,7 +297,9 @@ public class JavaHTTPServer implements Runnable {
     }
 
     private void createJson(String url) {
-        DocWriter.writeJsonFromURL(url);
+        System.out.println("Sending to dockWriter, rad 254");
+        System.out.println(url);
+//        DocWriter.writeJsonFromURL(url);
     }
 }
 
