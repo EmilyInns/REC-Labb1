@@ -49,6 +49,8 @@ public class JavaHTTPServer implements Runnable {
 
                 // create dedicated thread to manage the client connection
                 // problem for later
+
+
                 ExecutorService service = Executors.newCachedThreadPool();
                 ThreadPoolExecutor threadPool = (ThreadPoolExecutor) service;
 //                threadPool.submit();
