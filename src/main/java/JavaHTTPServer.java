@@ -279,6 +279,10 @@ public class JavaHTTPServer implements Runnable {
             return "text/css";
         } else if (fileRequested.endsWith(".json")) {
             return "application/json";
+        } else if (fileRequested.endsWith(".png")) {
+            return "image/png";
+        } else if (fileRequested.endsWith(".jpg")) {
+            return "image/jpeg";
         } else
             return "text/plain";
     }
